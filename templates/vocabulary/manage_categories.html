@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Categories - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-teal-500 to-cyan-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+    <h1 class="text-4xl font-bold mb-2">🏷️ Manage Categories</h1>
+    <p class="text-teal-100">Manage word types, difficulty levels, and word lists</p>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-8">
+    <!-- Word Types -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3">📝</span> Word Types
+        </h2>
+        
+        <!-- Add New Word Type -->
+        <form method="post" action="{% url 'vocabulary:add_word_type' %}" class="mb-6">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <input type="text" name="word_type" placeholder="e.g., noun, verb, adjective" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                <input type="text" name="abbreviation" placeholder="Abbreviation (optional)" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all">
+                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-teal-600 text-white py-3 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+                    ➕ Add Word Type
+                </button>
+            </div>
+        </form>
+        
+        <!-- Existing Word Types -->
+        <div class="space-y-3">
+            {% for word_type in word_types %}
+            <div class="bg-teal-50 rounded-2xl p-4 border border-teal-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold text-teal-800">{{ word_type.word_type }}</h4>
+                        {% if word_type.abbreviation %}
+                            <p class="text-sm text-teal-600">{{ word_type.abbreviation }}</p>
+                        {% endif %}
+                    </div>
+                    <span class="px-3 py-1 bg-teal-100 text-teal-800 text-xs font-medium rounded-full">
+                        {{ word_type.wordsbank_set.count }} words
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No word types defined</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Difficulty Levels -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3">⭐</span> Difficulty Levels
+        </h2>
+        
+        <!-- Add New Difficulty Level -->
+        <form method="post" action="{% url 'vocabulary:add_difficulty' %}" class="mb-6">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <select name="level" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">
+                    <option value="">Select difficulty level</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
+                </select>
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+                    ➕ Add Difficulty Level
+                </button>
+            </div>
+        </form>
+        
+        <!-- Existing Difficulty Levels -->
+        <div class="space-y-3">
+            {% for level in difficulty_levels %}
+            <div class="bg-purple-50 rounded-2xl p-4 border border-purple-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold text-purple-800 capitalize">{{ level.get_level_display }}</h4>
+                    </div>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
+                        {{ level.wordsbank_set.count }} words
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No difficulty levels defined</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Word Lists -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3">📋</span> Word Lists
+        </h2>
+        
+        <!-- Add New Word List -->
+        <form method="post" action="{% url 'vocabulary:add_word_list' %}" class="mb-6">
+            {% csrf_token %}
+            <div class="space-y-4">
+                <input type="text" name="name" placeholder="e.g., SAT Words, GRE Vocabulary" required 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                <textarea name="description" placeholder="Description (optional)" rows="2" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"></textarea>
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+                    ➕ Add Word List
+                </button>
+            </div>
+        </form>
+        
+        <!-- Existing Word Lists -->
+        <div class="space-y-3">
+            {% for word_list in word_lists %}
+            <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-semibold text-blue-800">{{ word_list.word_list_name }}</h4>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                        {{ word_list.wordsbank_set.count }} words
+                    </span>
+                </div>
+                {% if word_list.description %}
+                    <p class="text-sm text-blue-600">{{ word_list.description|truncatewords:10 }}</p>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No word lists defined</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="mt-8 bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">📊</span> Category Statistics
+    </h2>
+    
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="text-center p-6 bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl border border-teal-200">
+            <div class="text-3xl font-bold text-teal-600 mb-2">{{ word_types.count }}</div>
+            <div class="text-teal-800 font-medium">Word Types</div>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200">
+            <div class="text-3xl font-bold text-purple-600 mb-2">{{ difficulty_levels.count }}</div>
+            <div class="text-purple-800 font-medium">Difficulty Levels</div>
+        </div>
+        
+        <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200">
+            <div class="text-3xl font-bold text-blue-600 mb-2">{{ word_lists.count }}</div>
+            <div class="text-blue-800 font-medium">Word Lists</div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Navigation -->
+<div class="mt-8 text-center">
+    <a href="{% url 'vocabulary:admin_dashboard' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Admin Dashboard
+    </a>
+</div>
+{% endblock %}

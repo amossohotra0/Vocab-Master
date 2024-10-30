@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Word Relationships - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+    <h1 class="text-4xl font-bold mb-2">🔗 Word Relationships</h1>
+    <p class="text-emerald-100">Manage synonyms and antonyms between vocabulary words</p>
+</div>
+
+<!-- Add New Relationship -->
+<div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 mb-8 border border-white/20">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">➕</span> Add Word Relationship
+    </h2>
+    
+    <form method="post" action="{% url 'vocabulary:add_relationship' %}" class="grid md:grid-cols-4 gap-4 items-end">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">First Word</label>
+            <input type="text" id="word1-search" placeholder="Search word..." 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all">
+            <input type="hidden" name="word1" id="word1-id">
+            <div id="word1-suggestions" class="absolute z-10 w-full bg-white border border-gray-200 rounded-2xl mt-1 hidden max-h-40 overflow-y-auto shadow-lg"></div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Second Word</label>
+            <input type="text" id="word2-search" placeholder="Search word..." 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all">
+            <input type="hidden" name="word2" id="word2-id">
+            <div id="word2-suggestions" class="absolute z-10 w-full bg-white border border-gray-200 rounded-2xl mt-1 hidden max-h-40 overflow-y-auto shadow-lg"></div>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Relationship</label>
+            <select name="relationship_type" required 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all">
+                <option value="">Select type</option>
+                <option value="synonym">Synonym</option>
+                <option value="antonym">Antonym</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-3 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+            Add Relationship
+        </button>
+    </form>
+</div>
+
+<!-- Relationships List -->
+<div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+            <span class="mr-3">📋</span> All Relationships ({{ total_relationships }})
+        </h2>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Word 1</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Relationship</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Word 2</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for relationship in page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">{{ relationship.word1.word }}</div>
+                        <div class="text-sm text-gray-500">{{ relationship.word1.word_type }}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if relationship.relationship_type == 'synonym' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                ✅ Synonym
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                ❌ Antonym
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">{{ relationship.word2.word }}</div>
+                        <div class="text-sm text-gray-500">{{ relationship.word2.word_type }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        {{ relationship.created_at|date:"M d, Y" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center">
+                        <div class="text-gray-500">
+                            <span class="text-4xl mb-4 block">🔗</span>
+                            <p>No word relationships found</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="flex justify-center mt-8">
+    <nav class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-2">
+        <div class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" 
+                   class="px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors">Previous</a>
+            {% endif %}
+            
+            <span class="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold">
+                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" 
+                   class="px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors">Next</a>
+            {% endif %}
+        </div>
+    </nav>
+</div>
+{% endif %}
+
+<!-- Back Navigation -->
+<div class="mt-8 text-center">
+    <a href="{% url 'vocabulary:admin_dashboard' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Admin Dashboard
+    </a>
+</div>
+
+<script>
+// Word search functionality
+function setupWordSearch(inputId, hiddenId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const suggestions = document.getElementById(suggestionsId);
+    
+    input.addEventListener('input', async function() {
+        const query = this.value;
+        if (query.length < 2) {
+            suggestions.classList.add('hidden');
+            return;
+        }
+        
+        // Simple search simulation - in real app, make AJAX call
+        // For now, just show placeholder
+        suggestions.innerHTML = '<div class="p-2 text-gray-500">Type to search words...</div>';
+        suggestions.classList.remove('hidden');
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.classList.add('hidden');
+        }
+    });
+}
+
+setupWordSearch('word1-search', 'word1-id', 'word1-suggestions');
+setupWordSearch('word2-search', 'word2-id', 'word2-suggestions');
+</script>
+{% endblock %}

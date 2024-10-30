@@ -1,0 +1,370 @@
+{% extends 'base.html' %}
+
+{% block title %}Flashcards - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div id="main-content">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+        <h1 class="text-4xl font-bold mb-2">🎯 Interactive Flashcards</h1>
+        <p class="text-green-100">Master vocabulary with interactive learning cards</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8 border border-white/20">
+        <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="text-gray-400 text-xl">🔍</span>
+                </div>
+                <input type="text" id="search-input" placeholder="Search flashcards..." 
+                       class="w-full pl-12 pr-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-400 transition-all text-lg">
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="shuffle-btn" class="px-6 py-3 bg-purple-500 text-white rounded-2xl hover:bg-purple-600 transition-colors font-medium flex items-center">
+                    <span class="mr-2">🔀</span> Shuffle
+                </button>
+                <button id="auto-play-btn" class="px-6 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-colors font-medium flex items-center">
+                    <span class="mr-2">▶️</span> Auto Play
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-4 mb-8 border border-white/20">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-gray-600">Progress</span>
+            <span class="text-sm font-medium text-gray-600" id="progress-text">1 of {{ words.count }}</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+            <div class="bg-gradient-to-r from-green-500 to-blue-600 h-3 rounded-full transition-all duration-300" id="progress-bar" style="width: 0%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Study Mode Toggle -->
+<div class="fixed top-4 right-4 z-50 flex space-x-2">
+    <button id="minimize-btn" class="w-10 h-10 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors flex items-center justify-center shadow-lg">
+        <span class="text-lg">−</span>
+    </button>
+    <button id="close-btn" class="w-10 h-10 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors flex items-center justify-center shadow-lg">
+        <span class="text-lg">×</span>
+    </button>
+</div>
+
+<!-- Main Content -->
+<div id="main-content">
+    <!-- Header, Controls, Progress sections stay here -->
+</div>
+
+<!-- Flashcard Container -->
+<div class="flex justify-center mb-8">
+    <div class="relative w-full max-w-4xl h-[500px]">
+        <div id="flashcard-container" class="perspective-1000 h-full">
+            {% for word in words %}
+            <div class="flashcard w-full h-full cursor-pointer transform-style-preserve-3d transition-transform duration-700 hover:scale-105" 
+                 data-word-id="{{ word.id }}" style="{% if not forloop.first %}display: none;{% endif %}">
+                
+                <!-- Front of card -->
+                <div class="flashcard-front absolute inset-0 w-full h-full bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border border-white/20 backface-hidden flex items-center justify-center p-8">
+                    <div class="text-center">
+                        <div class="mb-6">
+                            <h2 class="text-5xl font-bold text-gray-800 mb-4">{{ word.word }}</h2>
+                            {% if word.pronunciation %}
+                                <p class="text-xl text-gray-500 bg-gray-100 px-4 py-2 rounded-full inline-block">{{ word.pronunciation }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex justify-center space-x-3 mb-6">
+                            <span class="px-4 py-2 bg-blue-100 text-blue-800 font-medium rounded-full">{{ word.word_type }}</span>
+                            {% if word.difficulty_level %}
+                                <span class="px-4 py-2 bg-purple-100 text-purple-800 font-medium rounded-full">{{ word.difficulty_level }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-gray-500 text-lg">
+                            <p class="mb-2">💡 Click to reveal meaning</p>
+                            <p class="text-sm">or press <kbd class="px-2 py-1 bg-gray-200 rounded">Space</kbd></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back of card -->
+                <div class="flashcard-back absolute inset-0 w-full h-full bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl shadow-2xl border border-white/20 backface-hidden rotate-y-180 p-6 overflow-y-auto">
+                    <div class="h-full flex flex-col">
+                        <div class="text-center mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ word.word }}</h2>
+                            {% if word.pronunciation %}
+                                <p class="text-lg text-gray-500">{{ word.pronunciation }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-1 space-y-4 text-sm">
+                            <div class="bg-white/80 rounded-xl p-4">
+                                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                                    <span class="mr-2">🇺🇸</span> English
+                                </h3>
+                                <p class="text-gray-600">{{ word.meaning_english }}</p>
+                            </div>
+                            
+                            <div class="bg-white/80 rounded-xl p-4">
+                                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                                    <span class="mr-2">🇵🇰</span> Urdu
+                                </h3>
+                                <p class="text-gray-600">{{ word.meaning_urdu }}</p>
+                            </div>
+                            
+                            {% if word.example_sentence %}
+                            <div class="bg-white/80 rounded-xl p-4">
+                                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                                    <span class="mr-2">💬</span> Example
+                                </h3>
+                                <p class="text-gray-600 italic">{{ word.example_sentence }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                {% if word.synonyms %}
+                                <div class="bg-green-50 rounded-xl p-3">
+                                    <h4 class="font-semibold text-green-800 mb-2 text-xs">✅ Synonyms</h4>
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for synonym in word.get_synonyms_list %}
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{{ synonym }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if word.antonyms %}
+                                <div class="bg-red-50 rounded-xl p-3">
+                                    <h4 class="font-semibold text-red-800 mb-2 text-xs">❌ Antonyms</h4>
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for antonym in word.get_antonyms_list %}
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">{{ antonym }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Controls -->
+<div class="flex justify-center space-x-4 mb-8">
+    <button id="prev-btn" class="px-8 py-4 bg-gray-500 text-white rounded-2xl hover:bg-gray-600 transition-colors font-medium flex items-center disabled:opacity-50">
+        <span class="mr-2">⬅️</span> Previous
+    </button>
+    <button id="flip-btn" class="px-8 py-4 bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-2xl hover:shadow-lg transition-all font-medium flex items-center">
+        <span class="mr-2">🔄</span> Flip Card
+    </button>
+    <button id="next-btn" class="px-8 py-4 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-colors font-medium flex items-center">
+        <span class="mr-2">➡️</span> Next
+    </button>
+</div>
+
+<!-- Study Stats -->
+<div id="study-stats" class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/20">
+    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <span class="mr-2">📊</span> Study Session Stats
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-blue-50 rounded-2xl">
+            <div class="text-2xl font-bold text-blue-600" id="cards-studied">0</div>
+            <div class="text-sm text-blue-700">Cards Studied</div>
+        </div>
+        <div class="text-center p-4 bg-green-50 rounded-2xl">
+            <div class="text-2xl font-bold text-green-600" id="cards-flipped">0</div>
+            <div class="text-sm text-green-700">Cards Flipped</div>
+        </div>
+        <div class="text-center p-4 bg-purple-50 rounded-2xl">
+            <div class="text-2xl font-bold text-purple-600" id="session-time">0:00</div>
+            <div class="text-sm text-purple-700">Session Time</div>
+        </div>
+        <div class="text-center p-4 bg-orange-50 rounded-2xl">
+            <div class="text-2xl font-bold text-orange-600">{{ words.count }}</div>
+            <div class="text-sm text-orange-700">Total Cards</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.perspective-1000 { perspective: 1000px; }
+.transform-style-preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }
+.flashcard.flipped { transform: rotateY(180deg); }
+</style>
+
+<script>
+let currentCard = 0;
+let isFlipped = false;
+let cardsStudied = 0;
+let cardsFlipped = 0;
+let sessionStartTime = Date.now();
+let autoPlayInterval = null;
+
+const flashcards = document.querySelectorAll('.flashcard');
+const totalCards = flashcards.length;
+
+// Update progress
+function updateProgress() {
+    const progress = ((currentCard + 1) / totalCards) * 100;
+    document.getElementById('progress-bar').style.width = progress + '%';
+    document.getElementById('progress-text').textContent = `${currentCard + 1} of ${totalCards}`;
+}
+
+// Show current card
+function showCard(index) {
+    flashcards.forEach((card, i) => {
+        card.style.display = i === index ? 'block' : 'none';
+    });
+    isFlipped = false;
+    flashcards[index].classList.remove('flipped');
+    updateProgress();
+}
+
+// Flip card
+function flipCard() {
+    if (currentCard < totalCards) {
+        flashcards[currentCard].classList.toggle('flipped');
+        isFlipped = !isFlipped;
+        if (isFlipped) {
+            cardsFlipped++;
+            document.getElementById('cards-flipped').textContent = cardsFlipped;
+        }
+    }
+}
+
+// Next card
+function nextCard() {
+    if (currentCard < totalCards - 1) {
+        if (isFlipped) cardsStudied++;
+        currentCard++;
+        showCard(currentCard);
+        document.getElementById('cards-studied').textContent = cardsStudied;
+    }
+}
+
+// Previous card
+function prevCard() {
+    if (currentCard > 0) {
+        currentCard--;
+        showCard(currentCard);
+    }
+}
+
+// Shuffle cards
+function shuffleCards() {
+    const container = document.getElementById('flashcard-container');
+    const cards = Array.from(flashcards);
+    
+    // Fisher-Yates shuffle
+    for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        container.appendChild(cards[j]);
+    }
+    
+    currentCard = 0;
+    showCard(0);
+}
+
+// Auto play
+function toggleAutoPlay() {
+    const btn = document.getElementById('auto-play-btn');
+    if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        btn.innerHTML = '<span class="mr-2">▶️</span> Auto Play';
+    } else {
+        autoPlayInterval = setInterval(() => {
+            if (!isFlipped) {
+                flipCard();
+            } else {
+                nextCard();
+            }
+        }, 3000);
+        btn.innerHTML = '<span class="mr-2">⏸️</span> Pause';
+    }
+}
+
+// Update session time
+function updateSessionTime() {
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    document.getElementById('session-time').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Study mode controls
+let isMinimized = false;
+
+document.getElementById('minimize-btn').addEventListener('click', function() {
+    const mainContent = document.getElementById('main-content');
+    const studyStats = document.getElementById('study-stats');
+    
+    if (isMinimized) {
+        mainContent.style.display = 'block';
+        studyStats.style.display = 'block';
+        this.innerHTML = '<span class="text-lg">−</span>';
+        isMinimized = false;
+    } else {
+        mainContent.style.display = 'none';
+        studyStats.style.display = 'none';
+        this.innerHTML = '<span class="text-lg">+</span>';
+        isMinimized = true;
+    }
+});
+
+document.getElementById('close-btn').addEventListener('click', function() {
+    if (confirm('Are you sure you want to exit the flashcard session?')) {
+        window.location.href = '{% url "vocabulary:dashboard" %}';
+    }
+});
+
+// Event listeners
+document.getElementById('flip-btn').addEventListener('click', flipCard);
+document.getElementById('next-btn').addEventListener('click', nextCard);
+document.getElementById('prev-btn').addEventListener('click', prevCard);
+document.getElementById('shuffle-btn').addEventListener('click', shuffleCards);
+document.getElementById('auto-play-btn').addEventListener('click', toggleAutoPlay);
+
+// Click to flip
+flashcards.forEach(card => {
+    card.addEventListener('click', flipCard);
+});
+
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+    switch(e.code) {
+        case 'Space':
+            e.preventDefault();
+            flipCard();
+            break;
+        case 'ArrowLeft':
+            prevCard();
+            break;
+        case 'ArrowRight':
+            nextCard();
+            break;
+    }
+});
+
+// Search functionality
+document.getElementById('search-input').addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    // Implementation for search filtering
+});
+
+// Initialize
+updateProgress();
+setInterval(updateSessionTime, 1000);
+</script>
+{% endblock %}

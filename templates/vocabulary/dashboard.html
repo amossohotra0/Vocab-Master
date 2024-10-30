@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Welcome Hero Section -->
+<div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl p-8 mb-8 text-white relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+    <div class="relative z-10">
+        <h1 class="text-4xl font-bold mb-3">Welcome back, {{ user.first_name|default:user.email|truncatechars:20 }}! 👋</h1>
+        <p class="text-blue-100 text-lg mb-6">Continue your vocabulary mastery journey</p>
+        <div class="grid grid-cols-3 gap-6">
+            <div class="text-center">
+                <div class="text-3xl font-bold">{{ total_words|default:"3500+" }}</div>
+                <div class="text-sm text-blue-100">Total Words</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold">{{ words_learned|default:"0" }}</div>
+                <div class="text-sm text-blue-100">Words Learned</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold">{{ streak_days|default:"0" }}</div>
+                <div class="text-sm text-blue-100">Day Streak</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-6 border border-white/20 hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-1">Total Words</h3>
+                <p class="text-3xl font-bold text-blue-600">{{ total_words }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+                <span class="text-2xl">📚</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-6 border border-white/20 hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-1">Word Types</h3>
+                <p class="text-3xl font-bold text-green-600">{{ word_types.count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                <span class="text-2xl">🏷️</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-6 border border-white/20 hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-1">Difficulty Levels</h3>
+                <p class="text-3xl font-bold text-purple-600">{{ difficulty_levels.count }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
+                <span class="text-2xl">⭐</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl p-6 border border-white/20 hover:scale-105 transition-transform duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-1">Your Progress</h3>
+                <p class="text-3xl font-bold text-orange-600">0%</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
+                <span class="text-2xl">📊</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-8">
+    <!-- Recent Words -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3">📖</span> Recent Words
+        </h3>
+        <div class="space-y-4">
+            {% for word in recent_words %}
+            <div class="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-l-4 border-blue-500 hover:shadow-md transition-shadow">
+                <h4 class="font-bold text-gray-800 text-lg">{{ word.word }}</h4>
+                <p class="text-sm text-gray-600 mt-1">{{ word.meaning_english|truncatewords:12 }}</p>
+                <div class="flex items-center mt-2 space-x-2">
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{ word.word_type }}</span>
+                    <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">{{ word.difficulty_level }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8 text-gray-500">
+                <span class="text-4xl mb-4 block">📚</span>
+                <p>Start learning to see recent words here!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3">⚡</span> Quick Actions
+        </h3>
+        <div class="space-y-4">
+            <a href="{% url 'vocabulary:flashcards' %}" class="block bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <div class="flex items-center">
+                    <span class="text-3xl mr-4">🎯</span>
+                    <div>
+                        <div class="font-bold text-lg">Start Flash Cards</div>
+                        <div class="text-sm text-blue-100">Interactive learning experience</div>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'vocabulary:word_list' %}" class="block bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <div class="flex items-center">
+                    <span class="text-3xl mr-4">📚</span>
+                    <div>
+                        <div class="font-bold text-lg">Browse Words</div>
+                        <div class="text-sm text-green-100">Explore vocabulary database</div>
+                    </div>
+                </div>
+            </a>
+            
+            {% if user.is_staff %}
+            <a href="{% url 'vocabulary:admin_dashboard' %}" class="block bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <div class="flex items-center">
+                    <span class="text-3xl mr-4">⚙️</span>
+                    <div>
+                        <div class="font-bold text-lg">Admin Dashboard</div>
+                        <div class="text-sm text-purple-100">Manage vocabulary content</div>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Study Tips Section -->
+<div class="mt-8 bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <span class="mr-3">💡</span> Study Tips for Success
+    </h3>
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border-l-4 border-blue-500">
+            <div class="flex items-start">
+                <span class="text-3xl mr-4">🔄</span>
+                <div>
+                    <div class="font-bold text-blue-800 text-lg">Spaced Repetition</div>
+                    <p class="text-sm text-blue-700 mt-2">Review words at increasing intervals for better long-term retention</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border-l-4 border-green-500">
+            <div class="flex items-start">
+                <span class="text-3xl mr-4">✍️</span>
+                <div>
+                    <div class="font-bold text-green-800 text-lg">Active Usage</div>
+                    <p class="text-sm text-green-700 mt-2">Create your own sentences and use new vocabulary in context</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border-l-4 border-purple-500">
+            <div class="flex items-start">
+                <span class="text-3xl mr-4">🌱</span>
+                <div>
+                    <div class="font-bold text-purple-800 text-lg">Word Roots</div>
+                    <p class="text-sm text-purple-700 mt-2">Learn etymology and root words to understand word families</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

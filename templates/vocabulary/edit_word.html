@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Word - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-orange-500 to-red-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+    <h1 class="text-4xl font-bold mb-2">✏️ Edit Word</h1>
+    <p class="text-orange-100">Modify vocabulary entry: <span class="font-semibold">{{ word.word }}</span></p>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
+                <h2 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                    <span class="mr-2">📝</span> Basic Information
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="word" class="block text-sm font-medium text-gray-700 mb-2">
+                            Word *
+                        </label>
+                        <input type="text" name="word" id="word" value="{{ word.word }}" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    </div>
+                    
+                    <div>
+                        <label for="pronunciation" class="block text-sm font-medium text-gray-700 mb-2">
+                            Pronunciation
+                        </label>
+                        <input type="text" name="pronunciation" id="pronunciation" value="{{ word.pronunciation }}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                               placeholder="/pronunciation/">
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label for="word_type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Word Type *
+                        </label>
+                        <select name="word_type" id="word_type" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            {% for word_type in word_types %}
+                                <option value="{{ word_type.id }}" {% if word_type.id == word.word_type.id %}selected{% endif %}>
+                                    {{ word_type.word_type }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="difficulty_level" class="block text-sm font-medium text-gray-700 mb-2">
+                            Difficulty Level
+                        </label>
+                        <select name="difficulty_level" id="difficulty_level" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            <option value="">Select difficulty</option>
+                            {% for level in difficulty_levels %}
+                                <option value="{{ level.id }}" {% if word.difficulty_level and level.id == word.difficulty_level.id %}selected{% endif %}>
+                                    {{ level.get_level_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Meanings -->
+            <div class="bg-green-50 rounded-2xl p-6 border border-green-200">
+                <h2 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                    <span class="mr-2">🌍</span> Meanings
+                </h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label for="meaning_english" class="block text-sm font-medium text-gray-700 mb-2">
+                            English Meaning *
+                        </label>
+                        <textarea name="meaning_english" id="meaning_english" rows="3" required 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">{{ word.meaning_english }}</textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="meaning_urdu" class="block text-sm font-medium text-gray-700 mb-2">
+                            Urdu Meaning *
+                        </label>
+                        <textarea name="meaning_urdu" id="meaning_urdu" rows="3" required 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">{{ word.meaning_urdu }}</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Example & Usage -->
+            <div class="bg-purple-50 rounded-2xl p-6 border border-purple-200">
+                <h2 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+                    <span class="mr-2">💬</span> Example & Usage
+                </h2>
+                
+                <div>
+                    <label for="example_sentence" class="block text-sm font-medium text-gray-700 mb-2">
+                        Example Sentence *
+                    </label>
+                    <textarea name="example_sentence" id="example_sentence" rows="3" required 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all">{{ word.example_sentence }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Synonyms & Antonyms -->
+            <div class="bg-orange-50 rounded-2xl p-6 border border-orange-200">
+                <h2 class="text-xl font-bold text-orange-800 mb-4 flex items-center">
+                    <span class="mr-2">🔗</span> Related Words
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="synonyms" class="block text-sm font-medium text-gray-700 mb-2">
+                            Synonyms
+                        </label>
+                        <textarea name="synonyms" id="synonyms" rows="3" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">{{ word.synonyms }}</textarea>
+                        <p class="text-xs text-gray-500 mt-1">Separate multiple synonyms with commas</p>
+                    </div>
+                    
+                    <div>
+                        <label for="antonyms" class="block text-sm font-medium text-gray-700 mb-2">
+                            Antonyms
+                        </label>
+                        <textarea name="antonyms" id="antonyms" rows="3" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all">{{ word.antonyms }}</textarea>
+                        <p class="text-xs text-gray-500 mt-1">Separate multiple antonyms with commas</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span class="mr-2">📚</span> Additional Information
+                </h2>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label for="etymology" class="block text-sm font-medium text-gray-700 mb-2">
+                            Etymology
+                        </label>
+                        <textarea name="etymology" id="etymology" rows="2" 
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">{{ word.etymology }}</textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="word_lists" class="block text-sm font-medium text-gray-700 mb-2">
+                            Word Lists
+                        </label>
+                        <select name="word_lists" id="word_lists" multiple 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+                            {% for word_list in word_lists %}
+                                <option value="{{ word_list.id }}" {% if word_list in word.word_lists.all %}selected{% endif %}>
+                                    {{ word_list.word_list_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple lists</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-4 pt-6">
+                <button type="submit" 
+                        class="flex-1 flex justify-center py-4 px-6 border border-transparent rounded-2xl shadow-sm text-lg font-medium text-white bg-gradient-to-r from-orange-600 to-red-600 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200 hover:scale-105">
+                    <svg class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Update Word
+                </button>
+                
+                <a href="{% url 'vocabulary:admin_dashboard' %}" 
+                   class="flex-1 flex justify-center py-4 px-6 border border-gray-300 rounded-2xl shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Word Preview -->
+<div class="mt-8 max-w-4xl mx-auto">
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/20">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <span class="mr-2">👁️</span> Current Word Preview
+        </h3>
+        
+        <div class="bg-gradient-to-r from-white to-gray-50 rounded-2xl p-6 border border-gray-200">
+            <div class="flex items-center gap-4 mb-4">
+                <h4 class="text-2xl font-bold text-gray-800">{{ word.word }}</h4>
+                {% if word.pronunciation %}
+                    <span class="text-lg text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ word.pronunciation }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                    {{ word.word_type }}
+                </span>
+                {% if word.difficulty_level %}
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                        {{ word.difficulty_level }}
+                    </span>
+                {% endif %}
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h5 class="font-semibold text-gray-700 mb-2">🇺🇸 English</h5>
+                    <p class="text-gray-600">{{ word.meaning_english }}</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-gray-700 mb-2">🇵🇰 Urdu</h5>
+                    <p class="text-gray-600">{{ word.meaning_urdu }}</p>
+                </div>
+            </div>
+            
+            {% if word.example_sentence %}
+            <div class="mt-4">
+                <h5 class="font-semibold text-gray-700 mb-2">💬 Example</h5>
+                <p class="text-gray-600 italic">{{ word.example_sentence }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

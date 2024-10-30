@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Word List - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+    <h1 class="text-4xl font-bold mb-2">📚 Vocabulary Words</h1>
+    <p class="text-blue-100">Explore {{ total_words }} carefully curated SAT vocabulary words</p>
+</div>
+
+<!-- Search and Controls -->
+<div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8 border border-white/20">
+    <div class="flex flex-col lg:flex-row gap-4 items-center">
+        <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-400 text-xl">🔍</span>
+            </div>
+            <input type="text" id="search-input" placeholder="Search words, meanings, or examples..." 
+                   class="w-full pl-12 pr-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-400 transition-all text-lg">
+            <div id="suggestions" class="absolute z-20 w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl mt-2 hidden max-h-64 overflow-y-auto shadow-2xl"></div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 bg-white/80 rounded-2xl px-4 py-2">
+                <span class="text-gray-600 font-medium">Show:</span>
+                <select id="per-page-select" class="bg-transparent border-none focus:ring-0 font-medium text-blue-600">
+                    <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                </select>
+                <span class="text-gray-600">per page</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Words Grid -->
+<div class="grid gap-6" id="words-container">
+    {% for word in page_obj %}
+    <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+        <div class="p-8">
+            <div class="flex flex-col lg:flex-row lg:items-start gap-6">
+                <!-- Word Info -->
+                <div class="flex-1">
+                    <div class="flex items-center gap-4 mb-4">
+                        <h2 class="text-3xl font-bold text-gray-800">{{ word.word }}</h2>
+                        {% if word.pronunciation %}
+                            <span class="text-lg text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{ word.pronunciation }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                            {{ word.word_type }}
+                        </span>
+                        {% if word.difficulty_level %}
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                                {{ word.difficulty_level }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">🇺🇸</span> English Meaning
+                            </h3>
+                            <p class="text-gray-600 leading-relaxed">{{ word.meaning_english }}</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">🇵🇰</span> Urdu Meaning
+                            </h3>
+                            <p class="text-gray-600 leading-relaxed">{{ word.meaning_urdu }}</p>
+                        </div>
+                        
+                        {% if word.example_sentence %}
+                        <div>
+                            <h3 class="font-semibold text-gray-700 mb-2 flex items-center">
+                                <span class="mr-2">💬</span> Example
+                            </h3>
+                            <p class="text-gray-600 italic bg-gray-50 p-4 rounded-2xl">{{ word.example_sentence }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Synonyms & Antonyms -->
+                <div class="lg:w-80">
+                    {% with related_synonyms=word.get_related_synonyms %}
+                    {% if related_synonyms %}
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="mr-2">✅</span> Synonyms
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for synonym in related_synonyms %}
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">{{ synonym.word }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    
+                    {% with related_antonyms=word.get_related_antonyms %}
+                    {% if related_antonyms %}
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="mr-2">❌</span> Antonyms
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for antonym in related_antonyms %}
+                                <span class="px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">{{ antonym.word }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="flex justify-center mt-12">
+    <nav class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-2">
+        <div class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}&per_page={{ per_page }}" 
+                   class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}&per_page={{ per_page }}" 
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Previous</a>
+            {% endif %}
+            
+            <span class="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold">
+                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}&per_page={{ per_page }}" 
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}&per_page={{ per_page }}" 
+                   class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium">Last</a>
+            {% endif %}
+        </div>
+    </nav>
+</div>
+{% endif %}
+
+<script>
+// Search functionality
+const searchInput = document.getElementById('search-input');
+const suggestions = document.getElementById('suggestions');
+const wordsContainer = document.getElementById('words-container');
+
+searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+    const wordItems = wordsContainer.querySelectorAll('.bg-white\\/70');
+    
+    wordItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(query)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Per-page change handler
+document.getElementById('per-page-select').addEventListener('change', function() {
+    const perPage = this.value;
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - VocabMaster{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+    <h1 class="text-4xl font-bold mb-2">👥 User Management</h1>
+    <p class="text-indigo-100">Manage users, permissions, and account status</p>
+</div>
+
+<!-- Search and Stats -->
+<div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8 border border-white/20">
+    <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="text-gray-400 text-xl">🔍</span>
+            </div>
+            <input type="text" id="search-input" placeholder="Search users by email or name..." 
+                   class="w-full pl-12 pr-4 py-4 bg-white/80 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-400 transition-all text-lg">
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="bg-indigo-100 px-4 py-2 rounded-2xl">
+                <span class="text-indigo-800 font-semibold">Total Users: {{ total_users }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users List -->
+<div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+            <span class="mr-3">📋</span> All Users
+        </h2>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for user in page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            {% if user.userprofile.profile_picture %}
+                                <img src="{{ user.userprofile.profile_picture }}" alt="Profile" class="w-10 h-10 rounded-full mr-3">
+                            {% else %}
+                                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                                    {{ user.email|first|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.email|truncatechars:25 }}{% endif %}
+                                </div>
+                                <div class="text-sm text-gray-500">{{ user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if user.is_active %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                                Blocked
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if user.is_superuser %}
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">Super Admin</span>
+                        {% elif user.is_staff %}
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Admin</span>
+                        {% else %}
+                            <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">User</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500">
+                        {{ user.date_joined|date:"M d, Y" }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-2">
+                            <a href="{% url 'vocabulary:edit_user' user.id %}" 
+                               class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+                                Edit
+                            </a>
+                            {% if user.is_active %}
+                                <a href="{% url 'vocabulary:toggle_user_status' user.id %}" 
+                                   class="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                                   onclick="return confirm('Block this user?')">
+                                    Block
+                                </a>
+                            {% else %}
+                                <a href="{% url 'vocabulary:toggle_user_status' user.id %}" 
+                                   class="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
+                                    Activate
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <div class="text-gray-500">
+                            <span class="text-4xl mb-4 block">👥</span>
+                            <p>No users found</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="flex justify-center mt-8">
+    <nav class="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-2">
+        <div class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors font-medium">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Previous</a>
+            {% endif %}
+            
+            <span class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold">
+                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" 
+                   class="px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors font-medium">Last</a>
+            {% endif %}
+        </div>
+    </nav>
+</div>
+{% endif %}
+
+<!-- Back Navigation -->
+<div class="mt-8 text-center">
+    <a href="{% url 'vocabulary:admin_dashboard' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:shadow-lg transition-all duration-200 hover:scale-105 font-medium">
+        <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Admin Dashboard
+    </a>
+</div>
+
+<script>
+// Search functionality
+const searchInput = document.getElementById('search-input');
+searchInput.addEventListener('input', function() {
+    const query = this.value;
+    const url = new URL(window.location);
+    if (query) {
+        url.searchParams.set('q', query);
+    } else {
+        url.searchParams.delete('q');
+    }
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+});
+
+// Set current search value
+if (new URLSearchParams(window.location.search).get('q')) {
+    searchInput.value = new URLSearchParams(window.location.search).get('q');
+}
+</script>
+{% endblock %}
