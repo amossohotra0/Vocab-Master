@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Out - VocabMaster</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-2xl">V</span>
+                </div>
+                <a href="{% url 'vocabulary:home' %}" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">VocabMaster</a>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign Out 👋
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Are you sure you want to end your session?
+            </p>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white/70 backdrop-blur-md py-8 px-4 shadow-2xl sm:rounded-3xl sm:px-10 border border-white/20">
+                <div class="text-center mb-8">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 mb-4">
+                        <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900">Confirm Sign Out</h3>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Your progress will be saved and you can continue anytime
+                    </p>
+                </div>
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Your data is safe</h3>
+                                <div class="mt-1 text-sm text-blue-700">
+                                    <p>All your vocabulary progress and settings are automatically saved.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button type="submit" class="flex-1 flex justify-center py-3 px-4 border border-transparent rounded-2xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-600 to-orange-600 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 hover:scale-105">
+                            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Yes, Sign Out
+                        </button>
+                        
+                        <a href="{% url 'vocabulary:dashboard' %}" class="flex-1 flex justify-center py-3 px-4 border border-gray-300 rounded-2xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-xs text-gray-500">
+                        💡 You can always sign back in to continue your vocabulary journey
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
